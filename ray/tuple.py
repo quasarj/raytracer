@@ -39,7 +39,7 @@ class Tuple:
         )
 
     def cross(self: Tuple, other: Tuple) -> Tuple:
-        return vector(
+        return Vector(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x
@@ -67,11 +67,19 @@ class Tuple:
         return tuple(0, 0, 0, 0) - self
 
     # allow multiplying by a scalar only
-    def __mul__(self: Tuple, scalar: float) -> Tuple:
-        return tuple(self.x * scalar,
-                     self.y * scalar,
-                     self.z * scalar,
-                     self.w * scalar)
+    def __mul__(self: Tuple, other) -> Tuple:
+        if isinstance(other, Tuple):
+            return tuple(
+                self.x * other.x,
+                self.y * other.y,
+                self.z * other.z,
+                self.w * other.w
+            )
+        else:
+            return tuple(self.x * other,
+                         self.y * other,
+                         self.z * other,
+                         self.w * other)
 
     def __truediv__(self: Tuple, scalar: float) -> Tuple:
         return tuple(self.x / scalar,
@@ -79,20 +87,22 @@ class Tuple:
                      self.z / scalar,
                      self.w / scalar)
 
-class Point(Tuple): pass
-class Vector(Tuple): pass
+    def __str__(self):
+        return f"{self.x} {self.y} {self.z}"
+
+class Point(Tuple):
+    def __init__(self, x, y, z):
+        super(Point, self).__init__(x, y, z, 1)
+
+class Vector(Tuple):
+    def __init__(self, x, y, z):
+        super(Vector, self).__init__(x, y, z, 0)
 
 
 # shortcuts
-def vector(x: float, y: float, z: float) -> Vector:
-    return Vector(x, y, z, 0.0)
-
-def point(x: float, y: float, z: float) -> Point:
-    return Point(x, y, z, 1.0)
-
 def tuple(x: float, y: float, z: float, w: float) -> Tuple:
     """Create a Vector or a Point, depending on w"""
 
-    if equal(w, 1.0): return point(x, y, z)
-    if equal(w, 0.0): return vector(x, y, z)
+    if equal(w, 1.0): return Point(x, y, z)
+    if equal(w, 0.0): return Vector(x, y, z)
     return Tuple(x, y, z, w)

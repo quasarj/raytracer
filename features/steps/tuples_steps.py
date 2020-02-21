@@ -1,4 +1,5 @@
-from ray.tuple import Tuple, Point, Vector, tuple, point, vector
+from ray.tuple import Tuple, Point, Vector, tuple
+from ray.color import Color
 from ray.util import equal
 
 # make a tuple, of any kind
@@ -31,12 +32,12 @@ def step_impl(context, a):
 # make a point
 @given(u'{var} ← point({x:g}, {y:g}, {z:g})')
 def step_impl(context, var, x, y, z):
-    setattr(context, var, point(x, y, z))
+    setattr(context, var, Point(x, y, z))
 
 # make a vector
 @given(u'{var} ← vector({x:g}, {y:g}, {z:g})')
 def step_impl(context, var, x, y, z):
-    setattr(context, var, vector(x, y, z))
+    setattr(context, var, Vector(x, y, z))
 
 # special rule for negating a tuple
 @then(u'-{var:S} = tuple({x:g}, {y:g}, {z:g}, {w:g})')
@@ -64,13 +65,13 @@ def step_impl(context, var1, var2, x, y, z, w):
 def step_impl(context, var1, var2, x, y, z):
     v1 = getattr(context, var1)
     v2 = getattr(context, var2)
-    assert v1 - v2 == vector(x, y, z)
+    assert v1 - v2 == Vector(x, y, z)
 
 @then(u'{var1} - {var2} = point({x:g}, {y:g}, {z:g})')
 def step_impl(context, var1, var2, x, y, z):
     v1 = getattr(context, var1)
     v2 = getattr(context, var2)
-    assert v1 - v2 == point(x, y, z)
+    assert v1 - v2 == Point(x, y, z)
 
 
 # scalar multiply
@@ -109,7 +110,7 @@ def step_impl(context, var, vector_var):
 @then(u'normalize({vector_var}) = vector({x:g}, {y:g}, {z:g})')
 def step_impl(context, vector_var, x, y, z):
     v = getattr(context, vector_var)
-    assert v.normalize() == vector(x, y, z)
+    assert v.normalize() == Vector(x, y, z)
 
 @then(u'normalize({vector_var}) = approximately vector({x:g}, {y:g}, {z:g})')
 def step_impl(context, vector_var, x, y, z):
@@ -132,5 +133,28 @@ def step_impl(context, vec1, vec2, x, y, z):
     v1 = getattr(context, vec1)
     v2 = getattr(context, vec2)
 
-    assert v1.cross(v2) == vector(x, y, z)
+    assert v1.cross(v2) == Vector(x, y, z)
     
+@given(u'{var} ← color({x:g}, {y:g}, {z:g})')
+def step_impl(context, var, x, y, z):
+    setattr(context, var, Color(x, y, z))
+
+@then(u'{color1} * {scalar:g} = color({x:g}, {y:g}, {z:g})')
+def step_impl(context, color1, scalar, x, y, z):
+    c1 = getattr(context, color1)
+    assert c1 * scalar == Color(x, y, z)
+    
+
+# test various color operations
+@then(u'{color1} {op} {color2} = color({x:g}, {y:g}, {z:g})')
+def step_impl(context, color1, op, color2, x, y, z):
+    c1 = getattr(context, color1)
+    c2 = getattr(context, color2)
+    test_color = Color(x, y, z)
+
+    if op == "+":
+        assert c1 + c2 == test_color
+    if op == "-":
+        assert c1 - c2 == test_color
+    if op == "*":
+        assert c1 * c2 == test_color
